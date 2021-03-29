@@ -178,4 +178,6 @@ Flask-PyMongo is a 3rd-party library that helps connect the MongoDB database and
 - MongoDB - a document database (stores data in JSON-like documents) with a horizontal, scale-out architecture that can support huge volumes of both data and traffic.
 - [Materialize](https://materializecss.com/) - a modern front-end framework (responsive and mobile-first, similar to Bootstrap) that helps developers build a stylish and responsive application.
 - Git - a version control system for for source code management; it allows tracking file changes and coordinating work on those files among multiple people and machines.
+
 - GitHub - a code hosting platform for version control and collaboration. It lets developers work remotely and together on projects from anywhere.
+
