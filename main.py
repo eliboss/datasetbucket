@@ -16,7 +16,9 @@ import ROI
 import generatePDF
 import passToPDF
 
+
 def readImage(f, l, targetReportPath):
+
 
   print("main")
       
@@ -93,6 +95,7 @@ def readImage(f, l, targetReportPath):
       r = int(255)
 
     c = np.array([b,g,r])
+
     
     # adding the most dominant color to a list for doing statistical analysis
     imageCalculations.addToList(l = c)
@@ -116,7 +119,6 @@ def readImage(f, l, targetReportPath):
     # clrs = []
     colour_bar = plot.plotColorBar(dominantColors)
     for clr in dominantColors:
-      
       # clrs.append(color)
       per_age = clr['color_percentage']
       info += str(int(per_age*100)) + "%" + " "
@@ -144,7 +146,6 @@ def readImage(f, l, targetReportPath):
 
     data.append(passToPDF.createData(analysis, info, colorBar))
 
-  
   reportMade = generatePDF.generatePDFReport(targetReportPath, None, None, dataResultsCSV, dataResultsJSON, dataResultsIMG = data)
   
   # imageCalculations.printList()

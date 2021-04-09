@@ -7,6 +7,7 @@ import shutil
 import time
 import sys
 
+# create and save the pdf report from the dicts, dataResultsCSV, dataResultsJSON
 
 # create and save the pdf report from the dicts, dataResultsCSV, dataResultsJSON
 
@@ -25,6 +26,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
     #         print("dir not made")
     
     # new instance of canvas every time we want to make a new report
+
     canvas = Canvas("report.pdf", pagesize=LETTER)
 
     # values to use for margin/formatting:
@@ -41,6 +43,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
 
 
     # if no data was found, return and send an error message to the user
+
     if dataResultsCSV is None and dataResultsIMG is None and dataResultsJSON is None:
         return False
     # if len(dataResultsCSV) is None and len(dataResultsCSV) is None and len(dataResultsJSON) is None:
@@ -61,6 +64,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
     
     # if dataResultsIMG is None and len(dataResultsIMG) == 0:
     #     return False
+
           
     # if no title or subtitle was passed in, use defualts
     if title is None or title == "":
@@ -113,6 +117,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
 
         canvas.line( marginLeftRight, currentLine-3, centerPageWidth, currentLine-4)
 
+
         ## might try to implement this later ##
         # canvas.drawString(marginLeftRight, currentLine + 1, "Variance: ")
         # canvas.drawImage("variance_color.jpg", marginLeftRight*4, currentLine, 40, 15)
@@ -127,11 +132,12 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
             if currentLine < marginTopBottom+20:
                         canvas.showPage()
                         currentLine = 730
-            # canvas.drawImage(idx[0],marginLeftRight*2, currentLine, 10, 10)
+
             currentLine -= 20
             canvas.drawImage(idx[2], marginLeftRight*1.2, currentLine - 1, 70, 15)
 
             canvas.drawString(marginLeftRight*4, currentLine + 2, idx[1])
+
             # canvas.drawString(marginLeftRight*2, currentLine, dataResultsIMG)
 
 
@@ -146,6 +152,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
             currentLine = currentLine - lineSpacing
             if isinstance(dataResultsCSV.get(var), dict):
                 for v in dataResultsCSV.get(var):
+
                     if currentLine < marginTopBottom:
                         canvas.showPage()
                         currentLine = 730
@@ -182,10 +189,12 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
             
     # TODO: need to check if current line runs off the page. If is does, need to make a new page
 
-
      # run through json dict and add each to the page
     if dataResultsJSON is not None and len(dataResultsJSON) > 0:
 
+
+     # run through json dict and add each to the page
+    if dataResultsJSON is not None and len(dataResultsJSON) > 0:
         for var in dataResultsJSON: # var is the category
             if len(dataResultsJSON.get(var)) > 1: 
                 if currentLine < marginTopBottom + 20:
@@ -212,7 +221,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
                                 canvas.drawString(marginLeftRight*2, currentLine, v +  ", " + str(dataResultsJSON.get(var)[v]))
                                 currentLine = currentLine - lineSpacing 
                                 break
-    
+
     # save report and copy to directory so that app.py can access it in the directory
     canvas.save()
     
@@ -221,6 +230,7 @@ def generatePDFReport(targetReportPath, title, subtitle, dataResultsCSV, dataRes
         return True
     if sys.platform.startswith('win32'):
         os.system("copy " + "report.pdf " + targetReportPath)
+
         return True
     else:
         print("File Not Copied!")

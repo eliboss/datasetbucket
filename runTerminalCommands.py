@@ -12,13 +12,11 @@ import filePath
 import zipfile
 import shutil
 
-# new comment
 #source /Users/kescardoso/Documents/GitHub/datasetbucket/venv/bin/activate
 
 # TODO: connect to frontend / get user-specified Kaggle dataset instead of the hard-coded one in the filename variable
 
 # creating the dataFiles directory
-
 
 # def makeFilesDir():
 #     try: 
@@ -110,6 +108,8 @@ def findReadableFiles(filename, targetReportPath, targetDataPath):
 
     # results from parsing + calculations, will be passed into >>  generatePDF.generatePDFReport()
     reportMade = generatePDF.generatePDFReport( targetReportPath, zipFile , None, dataResultsFoundCSV, dataResultsFoundJSON , []) # generate the PDF report
+
+    
     
     return reportMade
 
@@ -150,10 +150,12 @@ def openFiles(filename, targetDataPath):
         return zip
 
 def startCommands(filenameToDownload, targetReportPath, targetDataPath):
+
     filename = filenameToDownload
     time.sleep(3)
     if filename is not None:
         print('filename in filenameReady', filename)
+
         zipFile = openFiles(filename, targetDataPath) # save zipFiles so it can be accessed in findReadableFiles()
         print('zipFile', zipFile)
         time.sleep(7) # >>>>> protects from multithreading woes :,(

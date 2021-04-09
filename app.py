@@ -28,6 +28,7 @@ app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
 app.config["UPLOAD_FOLDER"] = os.environ.get("UPLOAD_FOLDER")
 app.config["REPORT_FOLDER"] = os.environ.get("REPORT_FOLDER")
 app.config["DATA_FILES"] = os.environ.get("DATA_FILES")
+
 app.config["ALLOWED_EXTENSIONS"] = os.environ.get("ALLOWED_EXTENSIONS")
 
 # Connect MongoDB to the Flask app 
@@ -144,6 +145,7 @@ def analyse_data():
             else:
                 return render_template("analyse.html", 
                                         dataToRender="Unable to generate report")
+
     return render_template("analyse.html")
 
 
