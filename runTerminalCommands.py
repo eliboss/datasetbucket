@@ -6,47 +6,171 @@ import read_json
 import read_csv
 import generatePDF
 
+import main
+import filePath
+
+import zipfile
+import shutil
+
+# new comment
+#source /Users/kescardoso/Documents/GitHub/datasetbucket/venv/bin/activate
+
 # TODO: connect to frontend / get user-specified Kaggle dataset instead of the hard-coded one in the filename variable
 
-os.system("cd ./dataFiles")
+# creating the dataFiles directory
 
-filename = "ronitf/heart-disease-uci"       # .csv dataset
-# filename = "dataturks/resume-entities-for-ner"    # .json dataset
+
+# def makeFilesDir():
+#     try: 
+#         os.makedirs("dataFiles") # creating a temp directory in runtime
+#         os.system("cd ./dataFiles")
+#         return True
+#     except: # need to delete temp folder if an error occured and it wasn't deleted before         
+#         try:
+#             shutil.rmtree("./dataFiles/") # deleting the temp directory
+#             time.sleep(3)
+#             os.makedirs("dataFiles") # make a new/clean dataFiles folder
+#             os.system("cd ./dataFiles")
+#             return True
+#         except:
+#             try: # sometimes an error ocurrs and dataFiles is made, but not as a directory. So delete it and remake it
+#                 os.remove("dataFiles") 
+#                 time.sleep(3)
+#                 os.makedirs("dataFiles")
+#                 return True
+#             except:
+#                 print("dataFiles not empty")
+#                 return False
+    
+
+
 zipFile = ""    # needed for report title later
-dataResultsFound = {} # results from parsing + calculations, will be passed into >>  generatePDF.generatePDFReport()
 
-def findReadableFiles():    # find .json or .csv files in ./dataFiles folder
-    for root, dirs, files in os.walk("./dataFiles"):
-            for filename in files:
-                if ".json" in filename:
-                    dataResultsFound = read_json.readJSON("./dataFiles/", filename)
-                if ".csv" in filename:
-                    dataResultsFound = read_csv.readCSV("./dataFiles/", filename)
-                    # TODO: ? need to make dataResultsFound appendable, or create multiple dicts in case a data set has more than 1 type of file 
-    generatePDF.generatePDFReport( zipFile , None, dataResultsFound) # generate the PDF report
-    return True
+ # find .json or .csv files in ./dataFiles folder
+def findReadableFiles(filename, targetReportPath, targetDataPath):   
+    dataResultsFoundCSV = {} # results from parsing + calculations, will be passed into >>  generatePDF.generatePDFReport()
+    dataResultsFoundJSON = {}
+    for root, dirs, files in os.walk("./dataFiles/"):
+
+            if sys.platform.startswith('darwin') | sys.platform.startswith('linux'):
+                if len(dirs) > 0:
+                    for d in dirs:
+                        for files in os.walk("./"+ targetDataPath+ "/"+d+"/"):
+                            
+                            for f1 in files:
+                                if isinstance(f1, list):
+                                    for fL in f1:
+                                    # global dataResultsFound
+                                        if ".json" in fL: 
+                                            stringD = "./"+ targetDataPath+ "/"+d
+                                            dataResultsFoundJSON = read_json.readJSON(stringD, fL)
+                                        if ".csv" in fL: 
+                                            dataResultsFoundCSV = read_csv.readCSV("./"+targetDataPath+"/", fL)
+
+                        fileImg = os.listdir("./"+ targetDataPath+"/"+d)
+                        print('fileImg', fileImg)
+                        for f in fileImg:
+                            if ".png" or ".jpeg" or ".jpg" in f:
+                                file_paths, l = filePath.getPath(d)
+                                if len(file_paths) != 0:
+                                    reportMade = main.readImage(file_paths, l, targetReportPath)
+                                                            
+                                    return reportMade           
+                elif len(dirs) == 0:
+                    for filename in files:
+                        # global dataResultsFound
+                        if ".json" in filename: 
+                            dataResultsFoundJSON = read_json.readJSON("./"+targetDataPath+"/", filename)
+
+                        if ".csv" in filename: 
+                            dataResultsFoundCSV = read_csv.readCSV("./"+targetDataPath+"/", filename)
+                            # TODO: ? need to make dataResultsFound appendable, or create multiple dicts in case a data set has more than 1 type of file 
+
+            if sys.platform.startswith('win32'):
+                for filename in files:
+                    with zipfile.ZipFile(filename,'r') as file:
+
+                        file.extractall("./"+targetDataPath) # extracting files in the dataFiles directory
+                        for name in file.namelist():
+                            data = file.read(name)
+
+                            if ".json" in name: 
+                                print(".json")
+                                dataResultsFoundJSON = read_json.readJSON("./"+targetDataPath+"/", name)
+                            
+                            if ".csv" in name:
+                                dataResultsFoundCSV = read_csv.readCSV("./"+targetDataPath+"/", name)
+                            if ".zip" not in name:
+                                if ".png" or ".jpeg" or ".jpg" in name:
+                                    file_paths, l = filePath.getPath('')
+                                    if len(file_paths) != 0:
+                                        reportMade = main.readImage(file_paths, l, targetReportPath)
+                                                                
+                                        return reportMade 
+
+    # results from parsing + calculations, will be passed into >>  generatePDF.generatePDFReport()
+    reportMade = generatePDF.generatePDFReport( targetReportPath, zipFile , None, dataResultsFoundCSV, dataResultsFoundJSON , []) # generate the PDF report
+    
+    return reportMade
+
 
 # copy zip to dataFiles folder and open the zip to get the data files
-def openFiles():  
+def openFiles(filename, targetDataPath):  
     if os.system("kaggle datasets download -d " + filename) == 0 :
         indexOfSlash = filename.find("/") # kaggle names dataset like: [creator of dataset]/[name of dataset]
-        zipFile = filename[(indexOfSlash+1):len(filename)]
-
-        os.system("cp " + zipFile + ".zip dataFiles") # copy to dataFiles folder
-        for root, dirs, files in os.walk("./dataFiles"): # find the .zip file in the folder
-            for fn in files:
-                os.system("open ./dataFiles/" + zipFile + ".zip") # open the file in a designated folder so we know where the files are!
+        zip = filename[(indexOfSlash+1):len(filename)]
         
-    return zipFile
-    
-zipFile = openFiles() # save zipFiles so it can be accessed in findReadableFiles()
-time.sleep(7) # >>>>> protects from multithreading woes :,(
+        # checking for macOS or linux
+        if sys.platform.startswith('darwin') | sys.platform.startswith('linux'):
+            #if makeFilesDir():
+            os.system("cp " + zip + ".zip " + targetDataPath) # copy to dataFiles folder
 
-if findReadableFiles():  # >>>>> protects from multithreading woes :,(
-    os.remove(zipFile + ".zip")
-    os.remove("./dataFiles/" + zipFile + ".zip") # dont need the copied zip anymore! ( still need to delete the zip in the main file system )
+        # checking for windows
+        if sys.platform.startswith('win32'):
+            #if makeFilesDir():
+            os.system("copy " + zip + ".zip " + targetDataPath) # copy to dataFiles folder
 
+        time.sleep(3)
+        
 
+        for root, dirs, files in os.walk(targetDataPath): # find the .zip file in the folder
+            print(dirs)
+            print(files)
+            for fn in files:
 
+                # checking for macOS or linux
+                if sys.platform.startswith('darwin') | sys.platform.startswith('linux'):
+                    print("open ./" + targetDataPath + "/" + zip + ".zip")
+                    os.system("open ./" + targetDataPath + "/" + zip + ".zip") # open the file in a designated folder so we know where the files are!
 
-    
+                # checking for windows
+                if sys.platform.startswith('win32'):
+                    os.system("start " + targetDataPath + " " + zip + ".zip") # open the file in a designated folder so we know where the files are!
+        
+        return zip
+
+def startCommands(filenameToDownload, targetReportPath, targetDataPath):
+    filename = filenameToDownload
+    time.sleep(3)
+    if filename is not None:
+        print('filename in filenameReady', filename)
+        zipFile = openFiles(filename, targetDataPath) # save zipFiles so it can be accessed in findReadableFiles()
+        print('zipFile', zipFile)
+        time.sleep(7) # >>>>> protects from multithreading woes :,(
+
+    if findReadableFiles(filename, targetReportPath, targetDataPath):  # >>>>> protects from multithreading woes :,(
+    # remove the dataFiles folder
+        try:
+            # shutil.rmtree("./dataFiles/") # deleting the temp directory
+            os.remove(zipFile + ".zip")
+        except:
+            x = 0
+         # delete original downloaded zip file
+        return True
+    else:
+        try:
+            # shutil.rmtree("./dataFiles/") # deleting the temp directory
+            os.remove(zipFile + ".zip")
+        except:
+            x = 0
+        return False
